@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link type="text/css" rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <button id="startButton">⏺️ Grabar pantalla</button>
+  <button id="stopButton" class="hidden">Detener Grabación</button>
+
+  <script>
+
+    const startButton = document.querySelector('#startButton');
+    const stopButton = document.querySelector('#stopButton');
+    let mediaRecorder;
+
+    startButton.addEventListener('click', async () => {
+      const mediaStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: 30 } },
+        audio: true // Captura audio
+      });
+
+      mediaRecorder = new MediaRecorder(mediaStream, {
+        mimeType: 'video/webm;codecs=vp8,opus'
+      });
+
+      mediaRecorder.start();
+
+      mediaRecorder.addEventListener('dataavailable', (e) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(e.data);
+        link.download = 'captura.webm';
+        link.click();
+      });
+
+      mediaRecorder.addEventListener('stop', () => {
+        mediaStream.getTracks().forEach(track => track.stop()); // Detiene todas las pistas
+      });
+
+      startButton.classList.add('hidden');
+      stopButton.classList.remove('hidden');
+    });
+
+    stopButton.addEventListener('click', () => {
+      mediaRecorder.stop();
+      stopButton.classList.add('hidden');
+      startButton.classList.remove('hidden');
+    });
+
+  </script>
+</body>
+
+</html>
